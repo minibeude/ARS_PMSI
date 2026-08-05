@@ -20,7 +20,7 @@
         <p class="badge badge-success">Disponible</p>
         <h2 id="signature-title">Documents à signer</h2>
         <p class="status privacy-note">Confidentialité : les fichiers sélectionnés et la signature restent sur votre ordinateur. Aucune donnée n’est transmise à un serveur.</p>
-        <p class="hint">La conversion est réalisée dans le navigateur. Selon la complexité du fichier RTF, la mise en page peut légèrement différer de celle affichée dans Microsoft Word.</p>
+        <p class="hint">La conversion est réalisée dans le navigateur avec RTFJS 3.0.7. Selon la complexité du fichier RTF, la mise en page peut légèrement différer de celle affichée dans Microsoft Word.</p>
         <p class="hint">Un ordinateur est recommandé pour traiter plusieurs arrêtés volumineux.</p>
       </div>
 
@@ -78,8 +78,16 @@
           </div>
         </section>
 
+        <section class="signature-section" aria-labelledby="preview-title">
+          <h3 id="preview-title">4. Prévisualisation</h3>
+          <p class="hint">Vérifiez cette prévisualisation avant de générer les PDF. La mise en page du PDF doit reprendre ce contenu.</p>
+          <button id="previewButton" class="btn btn-secondary" type="button" disabled>Prévisualiser le premier arrêté</button>
+          <p id="previewMessage" class="message" aria-live="polite"></p>
+          <div id="rtfPreview" class="rtf-preview" aria-live="polite"><p class="hint">Aucune prévisualisation générée.</p></div>
+        </section>
+
         <section class="signature-section" aria-labelledby="generation-title">
-          <h3 id="generation-title">4. Génération</h3>
+          <h3 id="generation-title">5. Génération</h3>
           <div class="actions-row">
             <button id="generateButton" class="btn btn-primary" type="button" disabled>Générer les PDF signés</button>
             <button id="downloadZipButton" class="btn btn-primary" type="button" disabled>Télécharger tous les PDF</button>
@@ -96,6 +104,13 @@
     </section>
   </main>
 
+  <!-- RTFJS 3.0.7 (MIT) : rendu HTML local des documents RTF dans le navigateur.
+       URL figée : https://cdn.jsdelivr.net/npm/rtf.js@3.0.7/dist/RTFJS.bundle.js
+       Le CDN fournit uniquement le code de la bibliothèque ; les fichiers utilisateur ne lui sont jamais envoyés. -->
+  <script src="https://cdn.jsdelivr.net/npm/rtf.js@3.0.7/dist/WMFJS.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/rtf.js@3.0.7/dist/EMFJS.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/rtf.js@3.0.7/dist/RTFJS.bundle.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="./app.js"></script>

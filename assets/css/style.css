@@ -114,3 +114,18 @@ pre { min-height: 180px; max-height: 360px; overflow: auto; padding: 14px; borde
 .progress-block { margin-top: var(--space-md); }
 progress { width: 100%; height: 18px; accent-color: var(--color-primary); }
 @media (max-width: 760px) { .settings-grid { grid-template-columns: 1fr; } .actions-row .btn, .selection-summary .btn { width: 100%; } }
+.rtf-preview { min-height: 240px; max-height: 620px; overflow: auto; margin-top: var(--space-md); padding: var(--space-lg); border: 1px solid var(--color-border); border-radius: var(--button-radius); background: var(--color-card); }
+.rtf-rendered-content { color: #111; font-family: "Times New Roman", Times, serif; line-height: 1.35; }
+.rtf-rendered-content table { min-width: 0; white-space: normal; page-break-inside: avoid; break-inside: avoid; }
+.rtf-rendered-content th, .rtf-rendered-content td { white-space: normal; }
+.pdf-render-host { position: fixed; left: -10000px; top: 0; width: 210mm; background: #fff; color: #111; }
+.pdf-page { width: 210mm; height: 297mm; overflow: hidden; padding: 18mm; background: #fff; break-after: page; }
+.pdf-page .rtf-rendered-content, .pdf-page { font-family: "Times New Roman", Times, serif; font-size: 12pt; line-height: 1.35; }
+.pdf-page table { min-width: 0; white-space: normal; page-break-inside: avoid; break-inside: avoid; }
+.pdf-page th, .pdf-page td { white-space: normal; }
+.pdf-signature { page-break-inside: avoid; break-inside: avoid; }
+.signature-align-left { text-align: left; }
+.signature-align-center { text-align: center; }
+.signature-align-right { text-align: right; }
+.pdf-signature img { max-width: 100%; height: auto; object-fit: contain; }
+@media (max-width: 760px) { .rtf-preview { padding: var(--space-md); } }

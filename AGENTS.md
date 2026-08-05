@@ -99,3 +99,7 @@ Toujours privilégier :
 - Les fichiers générés doivent rester en mémoire uniquement pendant la session utilisateur et ne doivent pas être stockés durablement dans `localStorage`, IndexedDB ou des cookies.
 - Les composants CSS partagés doivent être réutilisés en priorité, notamment `btn`, `btn-primary`, `btn-secondary`, `btn-disabled`, `card`, `badge-success` et `badge-warning`.
 - Les chemins doivent rester relatifs et compatibles avec GitHub Pages.
+
+## Formats documentaires structurés
+
+- Ne jamais tenter d’interpréter un format documentaire structuré comme RTF, DOCX ou PDF avec des expressions régulières. Utiliser une bibliothèque spécialisée et ajouter des tests avec des documents représentatifs.
