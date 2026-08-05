@@ -1,20 +1,65 @@
 # Outils PMSI
 
-Ce dépôt est un portail web statique destiné à regrouper plusieurs outils PMSI publiables sur GitHub Pages. La page d'accueil `index.html` liste les applications disponibles et les outils prévus.
+Ce dépôt est un portail web statique destiné à regrouper plusieurs outils PMSI publiables sur GitHub Pages. La page d'accueil `index.html` liste les applications disponibles et les outils prévus avec une interface homogène et extensible.
 
-## Arborescence
+## Arborescence du portail
 
 ```text
 .
+├── AGENTS.md                   # Guide permanent pour les futurs développements Codex
+├── README.md
 ├── index.html                  # Page d'accueil du portail « Outils PMSI »
 ├── assets/
 │   └── css/
-│       └── style.css           # Styles communs au portail et aux applications
+│       └── style.css           # Variables globales et composants CSS partagés
 └── validations-pmsi/
     └── index.html              # Tableau des validations PMSI
 ```
 
+Chaque outil doit vivre dans son propre dossier à la racine du dépôt, par exemple :
+
+```text
+validations-pmsi/
+ovalide/
+exports/
+```
+
+Chaque dossier d'outil contient son propre `index.html` afin que les applications restent indépendantes.
+
+## Compatibilité GitHub Pages
+
 Tous les liens utilisent des chemins relatifs (`./validations-pmsi/`, `../assets/css/style.css`) afin de rester compatibles avec GitHub Pages, y compris lorsque le dépôt est publié dans un sous-répertoire.
+
+N'utilisez pas de chemins absolus pour les pages, feuilles de style, scripts ou ressources.
+
+## Composants CSS partagés
+
+La feuille `assets/css/style.css` contient les variables globales du portail et les composants réutilisables.
+
+### Boutons
+
+Utilisez toujours la base `btn` avec une variante :
+
+- `btn btn-primary` pour l'action principale ;
+- `btn btn-secondary` pour une action secondaire ou un retour ;
+- `btn btn-disabled` pour une action indisponible.
+
+### Cartes
+
+Utilisez `card` pour les conteneurs visuels réutilisables. Les sous-éléments disponibles sont :
+
+- `card-header` ;
+- `card-body` ;
+- `card-footer`.
+
+### Badges
+
+Utilisez :
+
+- `badge badge-success` pour les états disponibles ;
+- `badge badge-warning` pour les états à venir ou en attente.
+
+Ne recréez pas de bouton, carte ou badge spécifique si un composant partagé couvre déjà le besoin.
 
 ## Tableau des validations PMSI
 
@@ -30,5 +75,9 @@ Les noms de fichiers TDB doivent suivre le format `champ.secteur.annee.mois.TDB.
    ```html
    <link rel="stylesheet" href="../assets/css/style.css" />
    ```
-4. Ajoutez une carte dans la grille de la page racine `index.html` avec un lien relatif vers `./nouvel-outil/`.
-5. Si l'outil a besoin de styles spécifiques, privilégiez des classes préfixées par le nom de l'outil pour éviter les collisions avec les autres applications.
+4. Structurez l'interface avec les composants partagés (`btn`, `card`, `badge`).
+5. Ajoutez une carte dans la grille de la page racine `index.html` avec un lien relatif vers `./nouvel-outil/`.
+6. Si l'outil a besoin de styles supplémentaires, créez uniquement des classes réutilisables ou clairement préfixées par l'outil.
+7. Vérifiez l'affichage desktop, tablette et mobile.
+
+Consultez `AGENTS.md` avant toute évolution afin de préserver les conventions du portail et d'éviter les régressions sur la logique métier des outils existants.

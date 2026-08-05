@@ -11,12 +11,12 @@
 </head>
 <body>
   <header>
-    <a class="back-link" href="../">← Retour aux outils PMSI</a>
+    <a class="btn btn-secondary" href="../">← Retour aux outils PMSI</a>
     <h1>Tableau de bord de l’avancée des validations</h1>
     <p>Visualisez l’avancée des validations. Importez 8 CSV TDB et un CSV de répartition, puis consultez les tableaux et exportez le classeur Excel.</p>
   </header>
   <main>
-    <aside>
+    <aside class="card">
       <h2>Paramètres</h2>
       <p class="hint">Noms TDB attendus : <code>mco.dgf.2026.7.TDB.csv</code>, <code>ssr.oqn.2026.07.TDB.csv</code>, etc.</p>
       <label for="tdbFiles">Sélectionne les 8 fichiers TDB (.csv)</label>
@@ -24,12 +24,12 @@
       <label for="repFile">Fichier répartition établissements (.csv)</label>
       <input id="repFile" type="file" accept=".csv,text/csv" />
       <div class="actions">
-        <button id="runBtn">🚀 Générer</button>
-        <button id="downloadBtn" class="secondary" disabled>💾 Télécharger l’Excel</button>
+        <button id="runBtn" class="btn btn-primary">🚀 Générer</button>
+        <button id="downloadBtn" class="btn btn-secondary" disabled>💾 Télécharger l’Excel</button>
       </div>
       <p id="status" class="status">En attente des fichiers.</p>
     </aside>
-    <section class="panel">
+    <section class="card panel">
       <nav class="tabs" id="tabs"></nav>
       <div class="content" id="content"></div>
     </section>
@@ -116,7 +116,7 @@ function buildOutputs() {
 }
 function renderAll(active='Résumé') {
   const views = {'Résumé': `<h3>Récapitulatif global par valideur</h3>${tableHtml(state.resume)}<h3>Ensemble des valideurs</h3>${tableHtml(state.ensemble)}`, 'Par valideur': state.validators.map(v=>`<h3>Valideur : ${v}</h3>${tableHtml(state.byValidator[v])}`).join(''), 'Séries quotidiennes': `<h3>Validations par jour et par valideur</h3>${tableHtml(state.daily)}`, 'Détail': `<h3>Aperçu des données concaténées</h3>${tableHtml(state.tables, 200)}`, 'Journal': '<h3>Journal</h3><pre id="logBox"></pre>'};
-  $('tabs').innerHTML = Object.keys(views).map(k => `<button class="tab ${k===active?'active':''}" data-tab="${k}">${k}</button>`).join('');
+  $('tabs').innerHTML = Object.keys(views).map(k => `<button class="btn tab ${k===active?'active':''}" data-tab="${k}">${k}</button>`).join('');
   $('content').innerHTML = `<div class="view active">${views[active]}</div>`; document.querySelectorAll('.tab').forEach(b => b.onclick = () => renderAll(b.dataset.tab)); renderLog();
 }
 function renderLog() { const box = $('logBox'); if (box) box.textContent = state.log.join('\n'); }

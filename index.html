@@ -14,36 +14,60 @@
 
   <main class="portal-container">
     <section class="tool-grid" aria-label="Liste des outils PMSI">
-      <article class="tool-card available">
-        <div class="tool-icon" aria-hidden="true">📊</div>
-        <p class="tool-status ready">Disponible</p>
-        <h3>Tableau des validations PMSI</h3>
-        <p>Import des fichiers TDB et de la répartition, synthèses par valideur, séries quotidiennes et export Excel.</p>
-        <a class="button-link" href="./validations-pmsi/">Ouvrir l’outil</a>
+      <article class="card tool-card available">
+        <div class="card-header">
+          <div class="tool-icon" aria-hidden="true">📊</div>
+          <p class="badge badge-success">Disponible</p>
+          <h3>Tableau des validations PMSI</h3>
+        </div>
+        <div class="card-body">
+          <p>Import des fichiers TDB et de la répartition, synthèses par valideur, séries quotidiennes et export Excel.</p>
+        </div>
+        <div class="card-footer">
+          <a class="btn btn-primary" href="./validations-pmsi/">Ouvrir l’outil</a>
+        </div>
       </article>
 
-      <article class="tool-card disabled" aria-disabled="true">
-        <div class="tool-icon" aria-hidden="true">🏥</div>
-        <p class="tool-status soon">À venir</p>
-        <h3>Contrôles établissements</h3>
-        <p>Tableaux de suivi des anomalies et contrôles qualité par établissement.</p>
-        <button disabled>À venir</button>
+      <article class="card tool-card disabled" aria-disabled="true">
+        <div class="card-header">
+          <div class="tool-icon" aria-hidden="true">🏥</div>
+          <p class="badge badge-warning">À venir</p>
+          <h3>Contrôles établissements</h3>
+        </div>
+        <div class="card-body">
+          <p>Tableaux de suivi des anomalies et contrôles qualité par établissement.</p>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-disabled" disabled>À venir</button>
+        </div>
       </article>
 
-      <article class="tool-card disabled" aria-disabled="true">
-        <div class="tool-icon" aria-hidden="true">📈</div>
-        <p class="tool-status soon">À venir</p>
-        <h3>Indicateurs d’activité</h3>
-        <p>Visualisations mensuelles des volumes, transmissions et tendances PMSI.</p>
-        <button disabled>À venir</button>
+      <article class="card tool-card disabled" aria-disabled="true">
+        <div class="card-header">
+          <div class="tool-icon" aria-hidden="true">📈</div>
+          <p class="badge badge-warning">À venir</p>
+          <h3>Indicateurs d’activité</h3>
+        </div>
+        <div class="card-body">
+          <p>Visualisations mensuelles des volumes, transmissions et tendances PMSI.</p>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-disabled" disabled>À venir</button>
+        </div>
       </article>
 
-      <article class="tool-card disabled" aria-disabled="true">
-        <div class="tool-icon" aria-hidden="true">🧾</div>
-        <p class="tool-status soon">À venir</p>
-        <h3>Exports réglementaires</h3>
-        <p>Préparation et vérification de fichiers d’export destinés aux campagnes de suivi.</p>
-        <button disabled>À venir</button>
+      <article class="card tool-card disabled" aria-disabled="true">
+        <div class="card-header">
+          <div class="tool-icon" aria-hidden="true">🧾</div>
+          <p class="badge badge-warning">À venir</p>
+          <h3>Exports réglementaires</h3>
+        </div>
+        <div class="card-body">
+          <p>Préparation et vérification de fichiers d’export destinés aux campagnes de suivi.</p>
+        </div>
+        <div class="card-footer">
+          <button class="btn btn-disabled" disabled>À venir</button>
+        </div>
       </article>
     </section>
   </main>
