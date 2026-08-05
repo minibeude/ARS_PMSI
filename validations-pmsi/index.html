@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TDB validations PMSI</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body>
+  <header>
+    <h1>📁 TDB validations PMSI</h1>
+    <p>Importez 8 CSV TDB et un CSV de répartition, puis consultez les tableaux et exportez le classeur Excel.</p>
+  </header>
+  <main>
+    <aside>
+      <h2>Paramètres</h2>
+      <p class="hint">Noms TDB attendus : <code>mco.dgf.2026.7.TDB.csv</code>, <code>ssr.oqn.2026.07.TDB.csv</code>, etc.</p>
+      <label for="tdbFiles">Sélectionne les 8 fichiers TDB (.csv)</label>
+      <input id="tdbFiles" type="file" accept=".csv,text/csv" multiple />
+      <label for="repFile">Fichier répartition établissements (.csv)</label>
+      <input id="repFile" type="file" accept=".csv,text/csv" />
+      <div class="actions">
+        <button id="runBtn">🚀 Générer</button>
+        <button id="downloadBtn" class="secondary" disabled>💾 Télécharger l’Excel</button>
+      </div>
+      <p id="status" class="status">En attente des fichiers.</p>
+    </aside>
+    <section class="panel">
+      <nav class="tabs" id="tabs"></nav>
+      <div class="content" id="content"></div>
+    </section>
+  </main>
+
+<script>
+const CHAMPS = ["MCO_Public","MCO_Privé","SMR_Public","SMR_Privé","HAD_Public","HAD_Privé","PSY_Public","PSY_Privé"];
+const ETATS = ["Non validé","Validé par l'établissement","Validé par la région"];
+const state = { tables: [], tablesOrd: [], resume: [], ensemble: [], byValidator: {}, daily: [], validators: [], log: [], month: null };
+const $ = id => document.getElementById(id);
+function log(msg) { state.log.push(`[${new Date().toLocaleTimeString('fr-FR')}] ${msg}`); renderLog(); }
+function uniformiserChamp(champ, pubpriv) { return `${String(champ).toUpperCase()}_${String(pubpriv).toLowerCase().replace(/^./, c => c.toUpperCase())}`.replaceAll(' ', ''); }
+function parseTdbFilename(name) {
+  const m = name.trim().split(/[\\/]/).pop().match(/^(mco|ssr|psy|had)\.(dgf|oqn)\.(\d{4})\.(\d{1,2})\.tdb\.csv$/i);
+  if (!m) return null;
+  return { champ: {mco:'MCO', ssr:'SMR', psy:'PSY', had:'HAD'}[m[1].toLowerCase()], pubpriv: {dgf:'Public', oqn:'Privé'}[m[2].toLowerCase()], year:+m[3], month:+m[4] };
+}
+function cleanFiness(v) { return String(v ?? '').replace(/^="?(.*?)"?$/, '$1'); }
+function parseDate(v) {
+  if (!v) return null;
+  const [d, mo, yAndTime] = String(v).trim().split('/');
+  if (!yAndTime) return null;
+  const [y, time='00:00:00'] = yAndTime.split(/\s+/, 2);
+  const iso = `${y}-${mo.padStart(2,'0')}-${d.padStart(2,'0')}T${time.length === 2 ? time + ':00:00' : time.length === 5 ? time + ':00' : time}`;
+  const dt = new Date(iso);
+  return Number.isNaN(dt.getTime()) ? null : dt;
+}
+function readCsv(file) { return new Promise((resolve, reject) => Papa.parse(file, { header:true, delimiter:';', skipEmptyLines:true, encoding:'ISO-8859-1', complete:r => resolve(r.data), error:reject })); }
+function countBy(rows, rowKey, colKey, rowLevels, colLevels) {
+  return rowLevels.map(r => Object.fromEntries([[rowKey, r], ...colLevels.map(c => [c, rows.filter(x => x[rowKey] === r && x[colKey] === c).length])]));
+}
+function addTotals(rows) {
+  return rows.map(r => { const total = ETATS.reduce((s,e)=>s+(+r[e]||0),0); return {...r, '% Région': total ? +(100 * r["Validé par la région"] / total).toFixed(1) : null}; });
+}
+function mkTabValidator(rows, validator) { return mkTab(rows.filter(r => r.Valideur === validator)); }
+function mkTab(rows) {
+  const base = addTotals(countBy(rows, 'Champ_pub_priv', 'Etat de validation', CHAMPS, ETATS));
+  const totals = Object.fromEntries(ETATS.map(e => [e, base.reduce((s,r)=>s+(+r[e]||0),0)]));
+  const grand = ETATS.reduce((s,e)=>s+totals[e],0);
+  base.push({Champ_pub_priv:'Total', ...totals, '% Région': grand ? +(100*totals["Validé par la région"]/grand).toFixed(1) : null, _class:'total'});
+  base.push({Champ_pub_priv:'%', ...Object.fromEntries(ETATS.map(e => [e, grand ? +(100*totals[e]/grand).toFixed(1) : null])), '% Région': grand ? +(100*totals["Validé par la région"]/grand).toFixed(1) : null, _class:'percent'});
+  return base;
+}
+function tableHtml(rows, limit=Infinity) {
+  const data = rows.slice(0, limit); if (!data.length) return '<p class="hint">Aucune donnée à afficher.</p>';
+  const cols = Object.keys(data[0]).filter(c => c !== '_class');
+  return `<div class="table-wrap"><table><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${data.map(r=>`<tr class="${r._class||''}">${cols.map(c=>`<td>${formatCell(r[c])}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+}
+function formatCell(v) { return v instanceof Date ? v.toLocaleString('fr-FR') : (v ?? ''); }
+async function run() {
+  const files = [...$('tdbFiles').files], repFile = $('repFile').files[0];
+  if (!files.length || !repFile) return alert('Sélectionnez les fichiers TDB et la répartition.');
+  Object.assign(state, { tables: [], resume: [], ensemble: [], byValidator: {}, daily: [], validators: [], log: [], month: null });
+  const repRows = await readCsv(repFile);
+  const missing = ['Finess','Champ','Public prive','Valideur'].filter(c => !(c in (repRows[0] || {})));
+  if (missing.length) return alert(`Colonnes manquantes dans la répartition : ${missing.join(', ')}`);
+  const repartition = new Map(repRows.map(r => [`${cleanFiness(r.Finess)}_${uniformiserChamp(r.Champ, r['Public prive'])}`, r.Valideur]));
+  const months = [];
+  for (const file of files) {
+    const meta = parseTdbFilename(file.name);
+    if (!meta) { log(`Nom non reconnu (ignoré) : ${file.name}`); continue; }
+    months.push(meta.month);
+    const rows = await readCsv(file);
+    rows.forEach(r => {
+      const cpp = uniformiserChamp(meta.champ, meta.pubpriv), id = `${cleanFiness(r.Finess)}_${cpp}`;
+      state.tables.push({ ID:id, Finess:cleanFiness(r.Finess), 'Raison sociale':r['Raison sociale'], 'Etat de validation':r['Etat de validation'], Champ_pub_priv:cpp, 'Dernière transmission':parseDate(r['Dernière transmission']), 'Date de validation établissement':parseDate(r['Date de validation établissement']), 'Date de validation ARS':parseDate(r['Date de validation ARS']), Valideur:repartition.get(id) || '' });
+    });
+  }
+  if (!state.tables.length) return alert('Aucun TDB reconnu. Vérifie les noms de fichiers.');
+  state.month = months[0] || null;
+  buildOutputs();
+  log(`Fichiers TDB importés: ${months.length} — Valideurs: ${state.validators.length} — Lignes: ${state.tables.length}`);
+  $('downloadBtn').disabled = false; $('status').textContent = 'Tableaux générés.'; renderAll('Résumé');
+}
+function buildOutputs() {
+  state.validators = [...new Set(state.tables.map(r=>r.Valideur).filter(Boolean))].sort();
+  const resumeRows = state.validators.map(v => Object.fromEntries([['Valideur', v], ...ETATS.map(e => [e, state.tables.filter(r => r.Valideur===v && r['Etat de validation']===e).length])]));
+  const totals = Object.fromEntries(ETATS.map(e => [e, resumeRows.reduce((s,r)=>s+r[e],0)])); const grand = ETATS.reduce((s,e)=>s+totals[e],0);
+  state.resume = [...resumeRows, {Valideur:'Total', ...totals, _class:'total'}, {Valideur:'%', ...Object.fromEntries(ETATS.map(e=>[e, grand ? +(100*totals[e]/grand).toFixed(1) : null])), _class:'percent'}];
+  state.ensemble = mkTab(state.tables); state.byValidator = Object.fromEntries(state.validators.map(v => [v, mkTabValidator(state.tables, v)]));
+  const byDay = {};
+  state.tables.filter(r=>r['Date de validation ARS'] && r.Valideur).forEach(r => { const j = r['Date de validation ARS'].toISOString().slice(0,10); byDay[j] ??= {}; byDay[j][r.Valideur] = (byDay[j][r.Valideur]||0)+1; });
+  state.daily = Object.keys(byDay).sort().map(j => ({Jour:j, ...Object.fromEntries(state.validators.map(v => [v, byDay[j][v] || 0]))}));
+}
+function renderAll(active='Résumé') {
+  const views = {'Résumé': `<h3>Récapitulatif global par valideur</h3>${tableHtml(state.resume)}<h3>Ensemble des valideurs</h3>${tableHtml(state.ensemble)}`, 'Par valideur': state.validators.map(v=>`<h3>Valideur : ${v}</h3>${tableHtml(state.byValidator[v])}`).join(''), 'Séries quotidiennes': `<h3>Validations par jour et par valideur</h3>${tableHtml(state.daily)}`, 'Détail': `<h3>Aperçu des données concaténées</h3>${tableHtml(state.tables, 200)}`, 'Journal': '<h3>Journal</h3><pre id="logBox"></pre>'};
+  $('tabs').innerHTML = Object.keys(views).map(k => `<button class="tab ${k===active?'active':''}" data-tab="${k}">${k}</button>`).join('');
+  $('content').innerHTML = `<div class="view active">${views[active]}</div>`; document.querySelectorAll('.tab').forEach(b => b.onclick = () => renderAll(b.dataset.tab)); renderLog();
+}
+function renderLog() { const box = $('logBox'); if (box) box.textContent = state.log.join('\n'); }
+function downloadXlsx() {
+  const wb = XLSX.utils.book_new();
+  const summary = [[`Etat d'avancement des validations${state.month ? ' M' + state.month : ''}`], [], ...jsonToRows(state.resume), [], ['Ensemble des valideurs'], ...jsonToRows(state.ensemble)];
+  state.validators.forEach(v => summary.push([], [`Valideur : ${v}`], ...jsonToRows(state.byValidator[v])));
+  summary.push([], ['Validations par jour et par valideur'], ...jsonToRows(state.daily));
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(summary), 'Résumé');
+  XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(state.tables.map(r => Object.fromEntries(Object.entries(r).map(([k,v]) => [k, formatCell(v)])))), 'Détail');
+  const d = new Date().toISOString().slice(0,10).replaceAll('-',''); XLSX.writeFile(wb, `${d}_${state.month ? 'M'+state.month+'_' : ''}tableau_de_bord.xlsx`);
+}
+function jsonToRows(rows) { if (!rows.length) return []; const cols = Object.keys(rows[0]).filter(c=>c !== '_class'); return [cols, ...rows.map(r => cols.map(c => formatCell(r[c])) )]; }
+$('runBtn').addEventListener('click', run); $('downloadBtn').addEventListener('click', downloadXlsx); renderAll();
+</script>
+</body>
+</html>
