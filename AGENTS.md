@@ -90,3 +90,12 @@ Toujours privilégier :
 - commentaires lorsque nécessaire
 
 Éviter toute duplication.
+
+## Nouveaux outils et données sensibles
+
+- Chaque nouvel outil doit être créé dans son propre dossier à la racine du dépôt, avec son propre `index.html`.
+- Les traitements de fichiers sensibles, PMSI ou professionnels doivent être réalisés exclusivement dans le navigateur de l'utilisateur.
+- Aucune donnée PMSI, professionnelle, document source, signature ou fichier généré ne doit être envoyée à un serveur, une API ou un service externe.
+- Les fichiers générés doivent rester en mémoire uniquement pendant la session utilisateur et ne doivent pas être stockés durablement dans `localStorage`, IndexedDB ou des cookies.
+- Les composants CSS partagés doivent être réutilisés en priorité, notamment `btn`, `btn-primary`, `btn-secondary`, `btn-disabled`, `card`, `badge-success` et `badge-warning`.
+- Les chemins doivent rester relatifs et compatibles avec GitHub Pages.
