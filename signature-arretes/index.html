@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Signature des arrêtés de versement - Outils PMSI</title>
+  <link rel="stylesheet" href="../assets/css/style.css" />
+</head>
+<body class="tool-page signature-page">
+  <header>
+    <a class="btn btn-secondary back-link" href="../">← Retour aux outils PMSI</a>
+    <p class="eyebrow">Traitement local</p>
+    <h1>Signature des arrêtés de versement</h1>
+    <p>Sélectionnez vos arrêtés au format RTF et l’image PNG de la signature. Les documents sont traités localement dans votre navigateur, puis convertis en PDF.</p>
+  </header>
+
+  <main class="tool-layout">
+    <section class="card signature-workspace" aria-labelledby="signature-title">
+      <div class="card-header">
+        <p class="badge badge-success">Disponible</p>
+        <h2 id="signature-title">Documents à signer</h2>
+        <p class="status privacy-note">Confidentialité : les fichiers sélectionnés et la signature restent sur votre ordinateur. Aucune donnée n’est transmise à un serveur.</p>
+        <p class="hint">La conversion est réalisée dans le navigateur. Selon la complexité du fichier RTF, la mise en page peut légèrement différer de celle affichée dans Microsoft Word.</p>
+        <p class="hint">Un ordinateur est recommandé pour traiter plusieurs arrêtés volumineux.</p>
+      </div>
+
+      <div class="card-body signature-sections">
+        <section class="signature-section" aria-labelledby="rtf-section-title">
+          <h3 id="rtf-section-title">1. Fichiers RTF</h3>
+          <div id="rtfDropZone" class="drop-zone" tabindex="0" role="button" aria-describedby="rtfHelp rtfError">
+            <label for="rtfInput">Sélectionner des fichiers RTF</label>
+            <input id="rtfInput" type="file" accept=".rtf,application/rtf,text/rtf" multiple />
+            <p id="rtfHelp" class="hint">Glissez-déposez vos arrêtés ici ou utilisez le sélecteur de fichiers.</p>
+          </div>
+          <p id="rtfError" class="message error-message" role="alert" aria-live="polite"></p>
+          <div class="selection-summary">
+            <strong id="rtfCount">0 fichier sélectionné</strong>
+            <button id="clearRtfButton" class="btn btn-secondary" type="button">Vider la sélection</button>
+          </div>
+          <div class="table-wrap file-table-wrap">
+            <table aria-label="Liste des fichiers RTF sélectionnés">
+              <thead>
+                <tr><th>Nom</th><th>Taille</th><th>État</th><th>Message</th><th>Action</th></tr>
+              </thead>
+              <tbody id="rtfList"><tr><td colspan="5">Aucun fichier RTF sélectionné.</td></tr></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="signature-section" aria-labelledby="png-section-title">
+          <h3 id="png-section-title">2. Signature PNG</h3>
+          <div id="signatureDropZone" class="drop-zone" tabindex="0" role="button" aria-describedby="signatureHelp signatureError">
+            <label for="signatureInput">Sélectionner la signature PNG</label>
+            <input id="signatureInput" type="file" accept=".png,image/png" />
+            <p id="signatureHelp" class="hint">Une seule image PNG est conservée en mémoire, uniquement pendant la session.</p>
+          </div>
+          <p id="signatureError" class="message error-message" role="alert" aria-live="polite"></p>
+          <div id="signaturePreview" class="signature-preview" aria-live="polite">Aucune signature sélectionnée.</div>
+          <button id="removeSignatureButton" class="btn btn-secondary" type="button">Supprimer la signature</button>
+        </section>
+
+        <section class="signature-section" aria-labelledby="settings-title">
+          <h3 id="settings-title">3. Paramètres</h3>
+          <div class="settings-grid">
+            <label for="signatureWidth">Largeur de la signature (mm)
+              <input id="signatureWidth" type="number" min="10" max="180" step="1" value="45" />
+            </label>
+            <label for="signatureAlignment">Alignement
+              <select id="signatureAlignment">
+                <option value="right" selected>Droite</option>
+                <option value="center">Centre</option>
+                <option value="left">Gauche</option>
+              </select>
+            </label>
+            <label for="spacingLines">Lignes avant la signature
+              <input id="spacingLines" type="number" min="0" max="10" step="1" value="2" />
+            </label>
+          </div>
+        </section>
+
+        <section class="signature-section" aria-labelledby="generation-title">
+          <h3 id="generation-title">4. Génération</h3>
+          <div class="actions-row">
+            <button id="generateButton" class="btn btn-primary" type="button" disabled>Générer les PDF signés</button>
+            <button id="downloadZipButton" class="btn btn-primary" type="button" disabled>Télécharger tous les PDF</button>
+            <button id="resetButton" class="btn btn-secondary" type="button">Réinitialiser</button>
+          </div>
+          <div class="progress-block" role="status" aria-live="polite" aria-atomic="true">
+            <label for="globalProgress">Progression globale</label>
+            <progress id="globalProgress" max="100" value="0"></progress>
+            <p id="progressText">0 fichier traité sur 0.</p>
+            <p id="resultMessage" class="message"></p>
+          </div>
+        </section>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="./app.js"></script>
+</body>
+</html>
